@@ -69,7 +69,7 @@ public:
 };
 
 Custom custom;
-geometry_msgs::Twist() msg;
+geometry_msgs::Twist msg;
 boost::shared_ptr<geometry_msgs::Twist> c_msg;
 
 ros::Subscriber sub_cmd_vel;
@@ -93,7 +93,7 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
     printf("[Zenoh] Deserializing!\n");
     boost::shared_array<uint8_t> de_buffer((uint8_t*) sample->payload.start);
     ros::serialization::IStream de_stream(de_buffer.get(), (uint32_t)sample->payload.len);
-    ros::serialization::deserialize(de_stream, *c_msg.get());
+    ros::serialization::deserialize(de_stream, msg);
     //
 
 
