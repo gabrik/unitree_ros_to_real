@@ -79,11 +79,14 @@ long cmd_vel_count = 0;
 void cmdZVelCallback(const z_sample_t *sample, void *arg)
 {
 
+    printf("[Zenoh] cmdVelCallback called!\n");
     uint8_t *buff = NULL;
     uint32_t serialized_size = 0;
+    geometry_msgs::Twist msg;
+    boost::shared_ptr<geometry_msgs::Twist> c_msg(&msg);
 
-    boost::shared_ptr<geometry_msgs::Twist> c_msg(new geometry_msgs::Twist());
     // Deserialization
+    printf("[Zenoh] Deserializing!\n");
     boost::shared_array<uint8_t> de_buffer((uint8_t*) sample->payload.start);
     ros::serialization::IStream de_stream(de_buffer.get(), (uint32_t)sample->payload.len);
     ros::serialization::deserialize(de_stream, *c_msg.get());
