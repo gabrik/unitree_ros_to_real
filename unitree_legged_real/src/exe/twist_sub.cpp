@@ -84,8 +84,8 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
 
     uint8_t *buff = NULL;
     uint32_t serialized_size = 0;
-    geometry_msgs::Twist msg;
-    boost::shared_ptr<geometry_msgs::Twist> c_msg(&msg);
+    geometry_msgs::Twist *msg = new geometry_msgs::Twist();
+    boost::shared_ptr<geometry_msgs::Twist> c_msg(msg);
 
     // Deserialization
     printf("[Zenoh] Deserializing!\n");
