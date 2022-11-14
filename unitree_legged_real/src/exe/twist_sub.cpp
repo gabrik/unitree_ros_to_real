@@ -81,14 +81,15 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
 
     geometry_msgs::Twist msg;
     // Deserialization
-    ros::serialization::IStream stream(sample->payload.start, (uint32_t)sample->payload.len);
+    boost::shared_array<uint8_t> buffer(sample->payload.start);
+    ros::serialization::IStream stream(buffer.get(), (uint32_t)sample->payload.len);
     ros::serialization::deserialize(stream, msg);
     //
 
 
     printf("[Zenoh] cmdVelCallback is running!\t%ld\n", cmd_vel_count);
 
-    custom.high_cmd = rosMsg2Cmd(msg);
+    custom.high_cmd = rosMsg2Cmd(&msg);
 
     printf("[Zenoh]  cmd_x_vel = %f\n", custom.high_cmd.velocity[0]);
     printf("[Zenoh]  cmd_y_vel = %f\n", custom.high_cmd.velocity[1]);
