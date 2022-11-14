@@ -9,6 +9,10 @@
 #include <pthread.h>
 #include <geometry_msgs/Twist.h>
 
+extern "C" {
+#include <zenoh-pico.h>
+}
+
 using namespace UNITREE_LEGGED_SDK;
 class Custom
 {
@@ -71,6 +75,52 @@ ros::Publisher pub_high;
 
 long cmd_vel_count = 0;
 
+
+void cmdZVelCallback(const z_sample_t *sample, void *arg)
+{
+
+    geometry_msgs::Twist msg;
+    // Deserialization
+    ros::serialization::IStream stream(sample->payload.start, (int)sample->payload.len);
+    ros::serialization::deserialize(stream, msg);
+    //
+
+
+    printf("[Zenoh] cmdVelCallback is running!\t%ld\n", cmd_vel_count);
+
+    custom.high_cmd = rosMsg2Cmd(msg);
+
+    printf("[Zenoh]  cmd_x_vel = %f\n", custom.high_cmd.velocity[0]);
+    printf("[Zenoh]  cmd_y_vel = %f\n", custom.high_cmd.velocity[1]);
+    printf("[Zenoh]  cmd_yaw_vel = %f\n", custom.high_cmd.yawSpeed);
+
+    unitree_legged_msgs::HighState high_state_ros;
+
+    high_state_ros = state2rosMsg(custom.high_state);
+
+    // Serializing
+    serialized_size = ros::serialization::serializationLength(high_state_ros);
+
+    boost::shared_array<uint8_t> buffer(new uint8_t[serialized_size]);
+
+    ros::serialization::OStream stream(buffer.get(), serialized_size);
+    ros::serialization::serialize(stream, high_state_ros);
+    buff = stream.getData();
+    //
+
+    // Print the hex
+    // printf("Here is the message(HighState):\n");
+    // for (int i = 0; i < serialized_size; i++)
+    // {
+    //     printf("%02X", buff[i]);
+    // }
+    // printf("\n");
+
+    // Publish here on Zenoh
+
+    printf("[Zenoh]  cmdVelCallback ending!\t%ld\n\n", cmd_vel_count++);
+}
+
 void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
 {
 
@@ -117,6 +167,34 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
 
 int main(int argc, char **argv)
 {
+
+    // Zenoh config
+	const char *keyexpr = "ros1/cmd_vel";
+	const char *mode = "client";
+	const char *locator = "tcp/127.0.0.1:7447";
+	///
+
+
+
+	/// Zenoh init
+	z_owned_config_t config = z_config_default();
+    zp_config_insert(z_config_loan(&config), Z_CONFIG_MODE_KEY, z_string_make(mode));
+    zp_config_insert(z_config_loan(&config), Z_CONFIG_PEER_KEY, z_string_make(locator));
+
+    printf("Opening session...\n");
+    z_owned_session_t s = z_open(z_config_move(&config));
+    if (!z_session_check(&s)) {
+        printf("Unable to open session!\n");
+        return -1;
+    }
+
+    // Start read and lease tasks for zenoh-pico
+    if (zp_start_read_task(z_session_loan(&s), NULL) < 0 || zp_start_lease_task(z_session_loan(&s), NULL) < 0) {
+        printf("Unable to start read and lease tasks");
+        return -1;
+    }
+	///
+
     ros::init(argc, argv, "twist_sub");
 
     ros::NodeHandle nh;
@@ -124,7 +202,18 @@ int main(int argc, char **argv)
     pub_high = nh.advertise<unitree_legged_msgs::HighState>("high_state", 1);
 
     sub_cmd_vel = nh.subscribe("cmd_vel", 1, cmdVelCallback);
+
+
     // Subscibe here on Zenoh
+    z_owned_closure_sample_t callback = z_closure_sample(cmdZVelCallback, NULL, NULL);
+    printf("Declaring Subscriber on '%s'...\n", keyexpr);
+    z_owned_subscriber_t sub =
+        z_declare_subscriber(z_session_loan(&s), z_keyexpr(keyexpr), z_closure_sample_move(&callback), NULL);
+    if (!z_subscriber_check(&sub)) {
+        printf("Unable to declare subscriber.\n");
+        return -1;
+    }
+    //
 
     LoopFunc loop_udpSend("high_udp_send", 0.002, 3, boost::bind(&Custom::highUdpSend, &custom));
     LoopFunc loop_udpRecv("high_udp_recv", 0.002, 3, boost::bind(&Custom::highUdpRecv, &custom));

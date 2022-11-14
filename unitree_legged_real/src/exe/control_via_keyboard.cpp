@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 
 	ros::Rate loop_rate(500);
 
-	ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+	// ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
 
 	geometry_msgs::Twist twist;
 
@@ -144,7 +144,9 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		pub.publish(twist);
+
+
+		// pub.publish(twist);
 
 
 		// Serialization
