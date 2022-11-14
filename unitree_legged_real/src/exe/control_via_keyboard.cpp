@@ -73,8 +73,8 @@ int main(int argc, char **argv)
 
 	// Zenoh declaring publisher
 	printf("Declaring publisher for '%s'...\n", keyexpr);
-    z_owned_publisher_t pub = z_declare_publisher(z_session_loan(&s), z_keyexpr(keyexpr), NULL);
-    if (!z_publisher_check(&pub)) {
+    z_owned_publisher_t zpub = z_declare_publisher(z_session_loan(&s), z_keyexpr(keyexpr), NULL);
+    if (!z_publisher_check(&zpub)) {
         printf("Unable to declare publisher for key expression!\n");
         return -1;
     }
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 		//
 
 		// Zenoh publish
-		z_publisher_put(z_publisher_loan(&pub), (const uint8_t *)buff, serialized_size, NULL);
+		z_publisher_put(z_publisher_loan(&zpub), (const uint8_t *)buff, serialized_size, NULL);
 		//
 
 		ros::spinOnce();
