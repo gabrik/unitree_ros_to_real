@@ -93,7 +93,7 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
     printf("[Zenoh] cmdVelCallback is running!\t%ld\n", cmd_vel_count);
 
     boost::shared_ptr<geometry_msgs::Twist> c_msg(msg);
-    custom.high_cmd = rosMsg2Cmd(&c_msg);
+    custom.high_cmd = rosMsg2Cmd(c_msg);
 
     printf("[Zenoh]  cmd_x_vel = %f\n", custom.high_cmd.velocity[0]);
     printf("[Zenoh]  cmd_y_vel = %f\n", custom.high_cmd.velocity[1]);
