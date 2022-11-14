@@ -95,7 +95,7 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
     boost::shared_array<uint8_t> buffer(new uint8_t[serialized_size]);
 
     ros::serialization::OStream stream(buffer.get(), serialized_size);
-    ros::serialization::serialize(stream, my_value);
+    ros::serialization::serialize(stream, high_state_ros);
     buff = stream.getData();
     //
 
