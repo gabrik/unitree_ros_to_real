@@ -42,19 +42,19 @@ int main(int argc, char **argv)
 
 
 	/// Zenoh init
-	 z_owned_config_t config = z_config_default();
-    zp_config_insert(z_loan(config), Z_CONFIG_MODE_KEY, z_string_make(mode));
-	zp_config_insert(z_loan(config), Z_CONFIG_PEER_KEY, z_string_make(locator));
+	z_owned_config_t config = z_config_default();
+    zp_config_insert(z_config_loan(&config), Z_CONFIG_MODE_KEY, z_string_make(mode));
+    zp_config_insert(z_config_loan(&config), Z_CONFIG_PEER_KEY, z_string_make(locator));
 
     printf("Opening session...\n");
-    z_owned_session_t s = z_open(z_move(config));
-    if (!z_check(s)) {
+    z_owned_session_t s = z_open(z_config_move(&config));
+    if (!z_session_check(&s)) {
         printf("Unable to open session!\n");
         return -1;
     }
 
     // Start read and lease tasks for zenoh-pico
-    if (zp_start_read_task(z_loan(s), NULL) < 0 || zp_start_lease_task(z_loan(s), NULL) < 0) {
+    if (zp_start_read_task(z_session_loan(&s), NULL) < 0 || zp_start_lease_task(z_session_loan(&s), NULL) < 0) {
         printf("Unable to start read and lease tasks");
         return -1;
     }
@@ -73,11 +73,12 @@ int main(int argc, char **argv)
 
 	// Zenoh declaring publisher
 	printf("Declaring publisher for '%s'...\n", keyexpr);
-    z_owned_publisher_t pub = z_declare_publisher(z_loan(s), z_keyexpr(keyexpr), NULL);
-    if (!z_check(pub)) {
+    z_owned_publisher_t pub = z_declare_publisher(z_session_loan(&s), z_keyexpr(keyexpr), NULL);
+    if (!z_publisher_check(&pub)) {
         printf("Unable to declare publisher for key expression!\n");
         return -1;
     }
+
 	//
 
 	long count = 0;
@@ -163,7 +164,7 @@ int main(int argc, char **argv)
 		//
 
 		// Zenoh publish
-		z_publisher_put(z_loan(pub), (const uint8_t *)buff, serialized_size, NULL);
+		z_publisher_put(z_publisher_loan(&pub), (const uint8_t *)buff, serialized_size, NULL);
 		//
 
 		ros::spinOnce();
