@@ -123,6 +123,7 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
     // Publish here on Zenoh
 
     printf("[Zenoh]  cmdVelCallback ending!\t%ld\n\n", cmd_vel_count++);
+    c_msg.reset();
 }
 
 void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
