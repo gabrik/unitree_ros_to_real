@@ -92,9 +92,9 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
     // Serializing
     serialized_size = ros::serialization::serializationLength(high_state_ros);
 
-    boost::shared_array<uint8_t> buffer(new uint8_t[serial_size]);
+    boost::shared_array<uint8_t> buffer(new uint8_t[serialized_size]);
 
-    ros::serialization::OStream stream(buffer.get(), serial_size);
+    ros::serialization::OStream stream(buffer.get(), serialized_size);
     ros::serialization::serialize(stream, my_value);
     buff = stream.getData();
     //
