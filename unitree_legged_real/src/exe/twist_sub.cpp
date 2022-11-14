@@ -81,9 +81,9 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
 
     geometry_msgs::Twist msg;
     // Deserialization
-    boost::shared_array<uint8_t> buffer(sample->payload.start);
-    ros::serialization::IStream stream(buffer.get(), (uint32_t)sample->payload.len);
-    ros::serialization::deserialize(stream, msg);
+    boost::shared_array<uint8_t> de_buffer(sample->payload.start);
+    ros::serialization::IStream de_stream(de_buffer.get(), (uint32_t)sample->payload.len);
+    ros::serialization::deserialize(de_stream, msg);
     //
 
 
@@ -100,10 +100,9 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
     high_state_ros = state2rosMsg(custom.high_state);
 
     // Serializing
-    serialized_size = ros::serialization::serializationLength(high_state_ros);
+    uint32_t serialized_size = ros::serialization::serializationLength(high_state_ros);
 
     boost::shared_array<uint8_t> buffer(new uint8_t[serialized_size]);
-
     ros::serialization::OStream stream(buffer.get(), serialized_size);
     ros::serialization::serialize(stream, high_state_ros);
     buff = stream.getData();
