@@ -22,7 +22,7 @@ endif()
 link_directories(${CMAKE_SOURCE_DIR}/unitree_legged_sdk/lib/cpp/${ARCH})
 link_directories(${CMAKE_SOURCE_DIR}/zenoh-pico/lib/${ARCH})
 
-set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
+set(EXTRA_LIBS -pthread libunitree_legged_sdk.so libzenoh_pico.so)
 
 set(CMAKE_CXX_FLAGS "-O3 -fPIC")
 
@@ -30,6 +30,7 @@ include_directories(
     include
     ${catkin_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/unitree_legged_sdk/include
+    ${CMAKE_SOURCE_DIR}/zenoh-pico/include
 )
 
 

@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include <geometry_msgs/Twist.h>
 #include <termios.h>
+#include <zenoh-pico.h>
 
 int getch()
 {
@@ -32,6 +33,34 @@ int getch()
 
 int main(int argc, char **argv)
 {
+	// Zenoh config
+	const char *keyexpr = "ros1/cmd_vel";
+	const char *mode = "client";
+	const char *locator = "tcp/127.0.0.1:7447";
+	///
+
+
+
+	/// Zenoh init
+	 z_owned_config_t config = z_config_default();
+    zp_config_insert(z_loan(config), Z_CONFIG_MODE_KEY, z_string_make(mode));
+	zp_config_insert(z_loan(config), Z_CONFIG_PEER_KEY, z_string_make(locator));
+
+    printf("Opening session...\n");
+    z_owned_session_t s = z_open(z_move(config));
+    if (!z_check(s)) {
+        printf("Unable to open session!\n");
+        return -1;
+    }
+
+    // Start read and lease tasks for zenoh-pico
+    if (zp_start_read_task(z_loan(s), NULL) < 0 || zp_start_lease_task(z_loan(s), NULL) < 0) {
+        printf("Unable to start read and lease tasks");
+        return -1;
+    }
+	///
+
+
 	ros::init(argc, argv, "keyboard_input_node");
 
 	ros::NodeHandle nh;
@@ -41,6 +70,15 @@ int main(int argc, char **argv)
 	ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
 
 	geometry_msgs::Twist twist;
+
+	// Zenoh declaring publisher
+	printf("Declaring publisher for '%s'...\n", keyexpr);
+    z_owned_publisher_t pub = z_declare_publisher(z_loan(s), z_keyexpr(keyexpr), NULL);
+    if (!z_check(pub)) {
+        printf("Unable to declare publisher for key expression!\n");
+        return -1;
+    }
+	//
 
 	long count = 0;
 
@@ -116,12 +154,16 @@ int main(int argc, char **argv)
 		buff = stream.getData();
 
 		// Print the hex
-		printf("Here is the message (Twist)\n");
-		for (int i = 0; i < serialized_size; i++)
-		{
-			printf("%02X", buff[i]);
-		}
-		printf("\n");
+		// printf("Here is the message (Twist)\n");
+		// for (int i = 0; i < serialized_size; i++)
+		// {
+		// 	printf("%02X", buff[i]);
+		// }
+		// printf("\n");
+		//
+
+		// Zenoh publish
+		z_publisher_put(z_loan(pub), (const uint8_t *)buff, serialized_size, NULL);
 		//
 
 		ros::spinOnce();
