@@ -80,6 +80,8 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
 {
 
     printf("[Zenoh] cmdVelCallback called!\n");
+    fflush(stdout);
+
     uint8_t *buff = NULL;
     uint32_t serialized_size = 0;
     geometry_msgs::Twist msg;
