@@ -24,7 +24,7 @@ link_directories(${CMAKE_SOURCE_DIR}/zenoh-pico/lib/${ARCH})
 
 set(EXTRA_LIBS -pthread libunitree_legged_sdk.so libzenoh_pico.so)
 
-set(CMAKE_CXX_FLAGS "-O3 -fPIC")
+set(CMAKE_CXX_FLAGS "-O3 -fPIC -DZENOH_LINUX")
 
 include_directories(
     include
