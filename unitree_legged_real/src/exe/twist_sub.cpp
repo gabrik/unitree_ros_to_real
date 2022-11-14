@@ -69,6 +69,8 @@ public:
 };
 
 Custom custom;
+geometry_msgs::Twist() msg;
+boost::shared_ptr<geometry_msgs::Twist> c_msg;
 
 ros::Subscriber sub_cmd_vel;
 ros::Publisher pub_high;
@@ -84,8 +86,8 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
 
     uint8_t *buff = NULL;
     uint32_t serialized_size = 0;
-    geometry_msgs::Twist *msg = new geometry_msgs::Twist();
-    boost::shared_ptr<geometry_msgs::Twist> c_msg(msg);
+    // geometry_msgs::Twist *msg = new geometry_msgs::Twist();
+    // boost::shared_ptr<geometry_msgs::Twist> c_msg(msg);
 
     // Deserialization
     printf("[Zenoh] Deserializing!\n");
@@ -183,6 +185,7 @@ int main(int argc, char **argv)
 	const char *locator = "tcp/127.0.0.1:7447";
 	///
 
+    c_msg.reset(&msg);
 
 
 	/// Zenoh init
