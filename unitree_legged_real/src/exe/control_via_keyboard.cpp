@@ -103,6 +103,27 @@ int main(int argc, char **argv)
 
 		pub.publish(twist);
 
+
+		// Serialization
+		uint8_t *buff = NULL;
+    	uint32_t serialized_size = 0;
+		serialized_size = ros::serialization::serializationLength(twist);
+
+		boost::shared_array<uint8_t> buffer(new uint8_t[serialized_size]);
+
+		ros::serialization::OStream stream(buffer.get(), serialized_size);
+		ros::serialization::serialize(stream, twist);
+		buff = stream.getData();
+
+		// Print the hex
+		printf("Here is the message:n\n");
+		for (int i = 0; i < serialized_size; i++)
+		{
+			printf("%02X", buff[i]);
+		}
+		printf("\n");
+		//
+
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
