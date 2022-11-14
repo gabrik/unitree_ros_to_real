@@ -81,7 +81,7 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
 
     geometry_msgs::Twist msg;
     // Deserialization
-    ros::serialization::IStream stream(sample->payload.start, (int)sample->payload.len);
+    ros::serialization::IStream stream(sample->payload.start, (uint32_t)sample->payload.len);
     ros::serialization::deserialize(stream, msg);
     //
 
