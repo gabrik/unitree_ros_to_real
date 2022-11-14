@@ -1,7 +1,11 @@
 #include "ros/ros.h"
 #include <geometry_msgs/Twist.h>
 #include <termios.h>
+
+extern "C" {
 #include <zenoh-pico.h>
+}
+
 
 int getch()
 {
