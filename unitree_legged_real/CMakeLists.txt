@@ -20,9 +20,9 @@ else()
 endif()
 
 link_directories(${CMAKE_SOURCE_DIR}/unitree_legged_sdk/lib/cpp/${ARCH})
-link_directories(${CMAKE_SOURCE_DIR}/zenoh-pico/lib/${ARCH})
+link_directories(${CMAKE_SOURCE_DIR}/zenoh-pico/build/lib)
 
-set(EXTRA_LIBS -pthread libunitree_legged_sdk.so libzenoh_pico.so)
+set(EXTRA_LIBS -pthread libunitree_legged_sdk.so libzenohpico.so)
 
 set(CMAKE_CXX_FLAGS "-O3 -fPIC -DZENOH_C_STANDARD=99 -DZENOH_LINUX")
 
