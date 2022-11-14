@@ -89,23 +89,28 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
 
     high_state_ros = state2rosMsg(custom.high_state);
 
-    serialized_size = high_state_ros.serializationLength();
-    buff = (uint8_t*) calloc(serialized_size, sizeof(uint8_t));
-    if (buff == NULL) {
-        printf("Error when allocating memory for serialization");
-        return;
-    }
+    // Serializing
+    serialized_size = ros::serialization::serializationLength(high_state_ros);
+
+    boost::shared_array<uint8_t> buffer(new uint8_t[serial_size]);
+
+    ros::serialization::OStream stream(buffer.get(), serial_size);
+    ros::serialization::serialize(stream, my_value);
+    buff = stream.getData();
+    //
 
     // pub_high.publish(high_state_ros);
-    high_state_ros.serialize(buff,serialized_size);
-    // Publish here on Zenoh
 
+
+    // Print the hex
     printf("Here is the message:n\n");
     for (int i = 0; i < serialized_size; i++)
     {
         printf("%02X", buff[i]);
     }
     printf("\n");
+
+    // Publish here on Zenoh
 
     printf("cmdVelCallback ending!\t%ld\n\n", cmd_vel_count++);
 }
