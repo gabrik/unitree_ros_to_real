@@ -24,7 +24,7 @@ public:
 
 public:
     Custom()
-        : 
+        :
         // low_udp(LOWLEVEL),
         low_udp(LOWLEVEL, 8091, "192.168.123.10", 8007),
         high_udp(8090, "192.168.123.161", 8082, sizeof(HighCmd), sizeof(HighState))
@@ -73,6 +73,10 @@ long cmd_vel_count = 0;
 
 void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
 {
+
+    uint8_t *buff = NULL;
+    uint32_t serialized_size = 0;
+
     printf("cmdVelCallback is running!\t%ld\n", cmd_vel_count);
 
     custom.high_cmd = rosMsg2Cmd(msg);
@@ -85,7 +89,23 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
 
     high_state_ros = state2rosMsg(custom.high_state);
 
-    pub_high.publish(high_state_ros);
+    serialized_size = high_state_ros.serializationLength();
+    buff = (uint8_t*) calloc(serialized_size, sizeof(uint8_t));
+    if (buff == NULL) {
+        printf("Error when allocating memory for serialization");
+        return;
+    }
+
+    // pub_high.publish(high_state_ros);
+    high_state_ros.serialize(buff,serialized_size);
+    // Publish here on Zenoh
+
+    printf("Here is the message:n\n");
+    for (int i = 0; i < serialized_size; i++)
+    {
+        printf("%02X", buff[i]);
+    }
+    printf("\n");
 
     printf("cmdVelCallback ending!\t%ld\n\n", cmd_vel_count++);
 }
@@ -99,6 +119,7 @@ int main(int argc, char **argv)
     pub_high = nh.advertise<unitree_legged_msgs::HighState>("high_state", 1);
 
     sub_cmd_vel = nh.subscribe("cmd_vel", 1, cmdVelCallback);
+    // Subscibe here on Zenoh
 
     LoopFunc loop_udpSend("high_udp_send", 0.002, 3, boost::bind(&Custom::highUdpSend, &custom));
     LoopFunc loop_udpRecv("high_udp_recv", 0.002, 3, boost::bind(&Custom::highUdpRecv, &custom));
