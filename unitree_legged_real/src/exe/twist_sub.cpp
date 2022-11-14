@@ -103,7 +103,7 @@ void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
 
 
     // Print the hex
-    printf("Here is the message:n\n");
+    printf("Here is the message(HighState):\n");
     for (int i = 0; i < serialized_size; i++)
     {
         printf("%02X", buff[i]);

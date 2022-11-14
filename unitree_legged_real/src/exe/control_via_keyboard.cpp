@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 		buff = stream.getData();
 
 		// Print the hex
-		printf("Here is the message:n\n");
+		printf("Here is the message (Twist)\n");
 		for (int i = 0; i < serialized_size; i++)
 		{
 			printf("%02X", buff[i]);

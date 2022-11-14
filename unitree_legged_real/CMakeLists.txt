@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     geometry_msgs
     unitree_legged_msgs
+
 )
 
 catkin_package()
@@ -19,6 +20,7 @@ else()
 endif()
 
 link_directories(${CMAKE_SOURCE_DIR}/unitree_legged_sdk/lib/cpp/${ARCH})
+link_directories(${CMAKE_SOURCE_DIR}/zenoh-pico/lib/${ARCH})
 
 set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
 
