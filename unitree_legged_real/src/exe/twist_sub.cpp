@@ -91,8 +91,8 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
 
     // Deserialization
     printf("[Zenoh] Deserializing!\n");
-    boost::shared_array<uint8_t> de_buffer((uint8_t*) sample->payload.start);
-    ros::serialization::IStream de_stream(de_buffer.get(), (uint32_t)sample->payload.len);
+    // boost::shared_array<uint8_t> de_buffer((uint8_t*) sample->payload.start);
+    ros::serialization::IStream de_stream((uint8_t*) sample->payload.start, (uint32_t)sample->payload.len);
     ros::serialization::deserialize(de_stream, msg);
     //
 
@@ -110,11 +110,13 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
 
     high_state_ros = state2rosMsg(custom.high_state);
 
-    // Serializing
+    // // Serializing
     serialized_size = ros::serialization::serializationLength(high_state_ros);
 
-    boost::shared_array<uint8_t> buffer(new uint8_t[serialized_size]);
-    ros::serialization::OStream stream(buffer.get(), serialized_size);
+    buff = (uint8_t*) calloc(serialized_size, sizeof(uint8_t));
+
+    // boost::shared_array<uint8_t> buffer(new uint8_t[serialized_size]);
+    ros::serialization::OStream stream(buff, serialized_size);
     ros::serialization::serialize(stream, high_state_ros);
     buff = stream.getData();
     //
@@ -130,6 +132,7 @@ void cmdZVelCallback(const z_sample_t *sample, void *arg)
     // Publish here on Zenoh
 
     printf("[Zenoh]  cmdVelCallback ending!\t%ld\n\n", cmd_vel_count++);
+    // free(buff);
 }
 
 void cmdVelCallback(const geometry_msgs::Twist::ConstPtr &msg)
